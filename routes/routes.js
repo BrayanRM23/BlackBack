@@ -7,6 +7,7 @@ import User from './models/user.js';
 import { getAllPosts, getFilteredPosts } from "./userArchivoController.js"
 
 const router = Router();
+
 const s3 = new AWS.S3({
   accessKeyId: process.env.BUCKET_PAPA, // Usa tus credenciales de AWS
   secretAccessKey: process.env.UNA_PAPA,
@@ -36,7 +37,7 @@ router
         // Generar la URL prefirmada
         const s3Params = {
           Bucket: process.env.BUCKET_PAPA, // Nombre del bucket
-          Key: `uploads/${fileName}`, // Nombre del archivo en S3
+          Key: fileName, // Nombre del archivo en S3
           Expires: 60 * 5, // La URL será válida por 5 minutos
           ContentType: 'application/octet-stream', // Tipo de contenido del archivo
         };
