@@ -56,41 +56,37 @@ router
     })
 
     .post("/files", async (req, res) => {
-        try {
-          const { username } = req.body; // Obtenemos el usuario de la petición
-          const file = req.files?.file;
-      
-          if (!file || !username) {
-            return res.status(400).json({ error: "Archivo y usuario requeridos." });
-          }
-      
-          // Buscar al usuario en la base de datos
-          const user = await User.findOne({ username });
-          if (!user) {
-            return res.status(404).json({ error: "Usuario no encontrado." });
-          }
-      
-          // Subir el archivo a S3
-          const fileURL = await uploadFile(file);
-      
-          // Crear un registro en MongoDB
-          const newArchivo = new UserArchivo({
-            userId: user._id, // Relacionamos con el ID del usuario
-            fileName: file.name,
-            fileURL: fileURL,
-          });
-      
-          await newArchivo.save();
-      
-          res.status(200).json({
-            message: "Archivo subido y registrado con éxito.",
-            fileURL,
-          });
-        } catch (error) {
-          console.error("Error al subir archivo:", error);
-          res.status(500).json({ error: "Error interno del servidor." });
+      try {
+        const { username, fileName, fileURL } = req.body; // Ahora recibimos directamente estos campos
+    
+        if (!username || !fileName || !fileURL) {
+          return res.status(400).json({ error: "Usuario, nombre de archivo y URL requeridos." });
         }
-      })
+    
+        // Buscar al usuario en la base de datos
+        const user = await User.findOne({ username });
+        if (!user) {
+          return res.status(404).json({ error: "Usuario no encontrado." });
+        }
+    
+        // Crear un registro en MongoDB
+        const newArchivo = new UserArchivo({
+          userId: user._id, // Relacionamos con el ID del usuario
+          fileName,
+          fileURL,
+        });
+    
+        await newArchivo.save();
+    
+        res.status(200).json({
+          message: "Información del archivo registrada con éxito.",
+          fileURL,
+        });
+      } catch (error) {
+        console.error("Error al registrar la información del archivo:", error);
+        res.status(500).json({ error: "Error interno del servidor." });
+      }
+    })
 
     .post("/user-files", async (req, res) => {
         try {
