@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import AWS from 'aws-sdk';
 import {uploadFile, getFiles, getfile, getfileURL} from '../s3.js'
 import {compareLogin, compareadmin, updatepassword, crearadmin, crearuser} from './controller.js'
 import { UserArchivo } from "./models/UserArchivo.js";
@@ -6,12 +7,50 @@ import User from './models/user.js';
 import { getAllPosts, getFilteredPosts } from "./userArchivoController.js"
 
 const router = Router();
+const s3 = new AWS.S3({
+  accessKeyId: process.env.BUCKET_PAPA, // Usa tus credenciales de AWS
+  secretAccessKey: process.env.UNA_PAPA,
+  region: process.env.REGION_PAPA,
+});
 
 router
     .get('/files', async (req, res)=>{
         const result =await getFiles()
         res.json(result.Contents)
     })
+
+    .post('/generate-presigned-url', async (req, res) => {
+      const { username, fileName } = req.body;
+    
+      if (!username || !fileName) {
+        return res.status(400).json({ error: 'Usuario y nombre de archivo requeridos.' });
+      }
+    
+      try {
+        // Buscar el usuario en la base de datos
+        const user = await User.findOne({ username });
+        if (!user) {
+          return res.status(404).json({ error: 'Usuario no encontrado.' });
+        }
+    
+        // Generar la URL prefirmada
+        const s3Params = {
+          Bucket: process.env.BUCKET_PAPA, // Nombre del bucket
+          Key: `uploads/${fileName}`, // Nombre del archivo en S3
+          Expires: 60 * 5, // La URL será válida por 5 minutos
+          ContentType: 'application/octet-stream', // Tipo de contenido del archivo
+        };
+    
+        const uploadUrl = await s3.getSignedUrlPromise('putObject', s3Params);
+    
+        // Retornar la URL prefirmada
+        res.status(200).json({ uploadUrl, fileName });
+      } catch (error) {
+        console.error('Error al generar la URL prefirmada:', error);
+        res.status(500).json({ error: 'Error interno del servidor.' });
+      }
+    })
+
     .post("/files", async (req, res) => {
         try {
           const { username } = req.body; // Obtenemos el usuario de la petición
