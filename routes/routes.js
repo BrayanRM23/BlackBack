@@ -5,13 +5,16 @@ import {compareLogin, compareadmin, updatepassword, crearadmin, crearuser} from 
 import { UserArchivo } from "./models/UserArchivo.js";
 import User from './models/user.js';
 import { getAllPosts, getFilteredPosts } from "./userArchivoController.js"
+import {BUCKET_PAPA, REGION_PAPA, PUBLIC_PAPA, UNA_PAPA} from '../config.js'
 
 const router = Router();
 
 const s3 = new AWS.S3({
-  accessKeyId: process.env.BUCKET_PAPA, // Usa tus credenciales de AWS
-  secretAccessKey: process.env.UNA_PAPA,
-  region: process.env.REGION_PAPA,
+  region: REGION_PAPA,
+    credentials: {
+        accessKeyId: PUBLIC_PAPA,
+        secretAccessKey: UNA_PAPA
+    }
 });
 
 router
@@ -36,7 +39,7 @@ router
     
         // Generar la URL prefirmada
         const s3Params = {
-          Bucket: process.env.BUCKET_PAPA, // Nombre del bucket
+          Bucket: BUCKET_PAPA, // Nombre del bucket
           Key: fileName, // Nombre del archivo en S3
           Expires: 60 * 5, // La URL será válida por 5 minutos
           ContentType: 'application/octet-stream', // Tipo de contenido del archivo
