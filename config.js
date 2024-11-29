@@ -2,7 +2,7 @@ import {config} from "dotenv"
 
 config()
 
-export const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME
-export const AWS_BUCKET_REGION = process.env.AWS_BUCKET_REGION
-export const AWS_PUBLIC_KEY = process.env.AWS_PUBLIC_KEY
-export const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY
+export const BUCKET_PAPA = process.env.BUCKET_PAPA
+export const REGION_PAPA = process.env.REGION_PAPA
+export const PUBLIC_PAPA = process.env.PUBLIC_PAPA
+export const UNA_PAPA = process.env.UNA_PAPA

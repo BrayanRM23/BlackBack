@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 });
 
 mongoose
-    .connect(process.env.MONGO_URI)
+    .connect(process.env.MONGO_URIEL)
     .then(() => console.log("Connected to MongoDB Atlas"))
     .catch((error) => console.error(error));
 
