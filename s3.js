@@ -1,13 +1,13 @@
 import {S3Client, PutObjectCommand, ListObjectsCommand, GetObjectCommand} from "@aws-sdk/client-s3"
-import {BUCKET_NAME_PAPA, REGION_PAPA, PUBLIC_PAPA, UNA_PAPA} from './config.js'
+import {AWS_BUCKET_NAME, AWS_BUCKET_REGION, AWS_PUBLIC_KEY, AWS_SECRET_KEY} from './config.js'
 import fs from 'fs'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 
 const client = new S3Client ({
-    region: REGION_PAPA,
+    region: AWS_BUCKET_REGION,
     credentials: {
-        accessKeyId: PUBLIC_PAPA,
-        secretAccessKey: UNA_PAPA
+        accessKeyId: AWS_PUBLIC_KEY,
+        secretAccessKey: AWS_SECRET_KEY
     }
 })
 
@@ -15,7 +15,7 @@ const client = new S3Client ({
 export async function uploadFile(file) {
   const stream = fs.createReadStream(file.tempFilePath);
   const uploadParams = {
-    Bucket: process.env.BUCKET_NAME_PAPA,
+    Bucket: process.env.AWS_BUCKET_NAME,
     Key: file.name,
     Body: stream,
   };
@@ -24,14 +24,14 @@ export async function uploadFile(file) {
   await client.send(command);
 
   // Generar la URL del archivo en S3
-  const fileURL = `https://${process.env.BUCKET_NAME_PAPA}.s3.amazonaws.com/${file.name}`;
+  const fileURL = `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${file.name}`;
   return fileURL;
 }
 
 
 export async function getFiles() {
     const command= new ListObjectsCommand({
-        Bucket: BUCKET_NAME_PAPA
+        Bucket: AWS_BUCKET_NAME
     })
     return await client.send(command)
     
@@ -39,7 +39,7 @@ export async function getFiles() {
 
 export async function getfile(filename) {
     const command = new GetObjectCommand({
-        Bucket: BUCKET_NAME_PAPA,
+        Bucket: AWS_BUCKET_NAME,
         Key: filename
     })
     return await client.send(command)
@@ -48,7 +48,7 @@ export async function getfile(filename) {
 
 export async function downloadfile(filename) {
     const command = new GetObjectCommand({
-        Bucket: BUCKET_NAME_PAPA,
+        Bucket: AWS_BUCKET_NAME,
         Key: filename
     })
     const result = await client.send(command)
@@ -59,7 +59,7 @@ export async function downloadfile(filename) {
 
 export async function getfileURL(filename) {
     const command = new GetObjectCommand({
-        Bucket: BUCKET_NAME_PAPA,
+        Bucket: AWS_BUCKET_NAME,
         Key: filename
     })
     return await getSignedUrl(client, command, {expiresIn:3600})
